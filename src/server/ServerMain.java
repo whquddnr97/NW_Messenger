@@ -15,9 +15,6 @@ import java.util.concurrent.Executors;
 
 public class ServerMain
 {
-	//귓속말 기능을 구현하기 위해 이름을 key, 출력 스트림을 value로 하는 해쉬맵을 생성
-	private static HashMap<String, PrintWriter> participants = new HashMap<>(); 
-	
 	public static void main(String[] args) throws Exception
 	{
 		System.out.println("The chat server is running...");
@@ -55,6 +52,18 @@ public class ServerMain
 				{
 					String input = in.nextLine();
 					if (input.startsWith("CONNECETED"))
+					{
+						System.out.println(input);
+					}
+					if (input.startsWith("LOGIN"))
+					{
+						System.out.println(input);
+					}
+					if (input.startsWith("FINDPW"))
+					{
+						System.out.println(input);
+					}
+					if (input.startsWith("REGISTER"))
 					{
 						System.out.println(input);
 					}

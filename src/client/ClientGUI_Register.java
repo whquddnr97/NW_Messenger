@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -38,6 +41,9 @@ public class ClientGUI_Register extends JFrame
 	private JTextField additionalField;
 	private JButton btnRegister;
 	
+	private Socket socket;
+	private Scanner in;
+	private PrintWriter out;
 	private String id = "";
 	private String password = "";
 	private String nickName = "";
@@ -48,8 +54,13 @@ public class ClientGUI_Register extends JFrame
 	private String homepage = "";
 	private String additional = "";
 	
-	public ClientGUI_Register()
+	public ClientGUI_Register(Socket socket, Scanner in, PrintWriter out)
 	{
+		this.socket = socket;
+		this.in = in;
+		this.out = out;
+		
+		setTitle("Register");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 389);
 		contentPane = new JPanel();
@@ -214,6 +225,12 @@ public class ClientGUI_Register extends JFrame
 				{
 					JOptionPane.showMessageDialog(null, "id, password, nickname, name, email, birth is necessary");
 				}
+				else
+				{
+					out.println("REGISTER " + id + " " + password + " " + nickName + " " +
+								name + " " + email + " " + birth + " " + phoneNumber + " " +
+								homepage + " " + additional + " ");
+				}
 			}
 		});
 	}
@@ -222,51 +239,5 @@ public class ClientGUI_Register extends JFrame
 	public boolean isBlank(String id, String password, String nickName, String name, String email, String birth)
 	{
 		return id.isEmpty() || password.isEmpty() || nickName.isEmpty() || name.isEmpty() || email.isEmpty() || birth.isEmpty();
-	}
-	
-	/*ClientMain에서 가입정보 얻기위한 getter*/
-	public String getId()
-	{
-		return id;
-	}
-
-	public String getPassword()
-	{
-		return password;
-	}
-
-	public String getNickName()
-	{
-		return nickName;
-	}
-
-	public String getName()
-	{
-		return name;
-	}
-
-	public String getEmail()
-	{
-		return email;
-	}
-
-	public String getBirth()
-	{
-		return birth;
-	}
-
-	public String getPhoneNumber()
-	{
-		return phoneNumber;
-	}
-
-	public String getHomepage()
-	{
-		return homepage;
-	}
-
-	public String getAdditional()
-	{
-		return additional;
 	}
 }

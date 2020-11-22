@@ -4,10 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -24,11 +28,18 @@ public class ClientGUI_FindPassword extends JFrame
 	private JTextField emailField;
 	private JButton btnFindPassword;
 	
+	private Socket socket;
+	private Scanner in;
+	private PrintWriter out;
 	private String id = "";
 	private String email = "";
 	
-	public ClientGUI_FindPassword()
+	public ClientGUI_FindPassword(Socket socket, Scanner in, PrintWriter out)
 	{
+		this.socket = socket;
+		this.in = in;
+		this.out = out;
+		
 		setTitle("Find Password");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 328, 169);
@@ -78,21 +89,9 @@ public class ClientGUI_FindPassword extends JFrame
 			{
 				id = idField.getText();
 				email = emailField.getText();
-				idField.setText("");
-				emailField.setText("");
+				out.println("FINDPW " + id + " " + email);
+				setVisible(false);
 			}
 		});
 	}
-	
-	/*ClientMain에서 아이디, 이메일 얻기위한 getter*/
-	public String getId()
-	{
-		return id;
-	}
-	
-	public String getEmail()
-	{
-		return email;
-	}
-
 }

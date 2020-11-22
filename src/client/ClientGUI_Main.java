@@ -1,23 +1,22 @@
 package client;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+import java.net.InetAddress;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.BoxLayout;
 import javax.swing.JTextField;
-import java.awt.Component;
-import javax.swing.Box;
 import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.SwingConstants;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
 
 public class ClientGUI_Main extends JFrame
 {
@@ -27,11 +26,45 @@ public class ClientGUI_Main extends JFrame
 	private JTextField idField;
 	private JPasswordField passwordField;
 	
-	private String id;
-	private String password;
+	private String serverAddress;
+	private int serverPort;
+	private Socket socket;
+	private Scanner in;
+	private PrintWriter out;
+	private String id = "";
+	private String password = "";
+	
+	public void run() throws IOException
+	{
+		try
+		{
+			socket = new Socket(serverAddress, serverPort); // 불러온 서버주소, port로 연결 요청
+            in = new Scanner(socket.getInputStream());
+            out = new PrintWriter(socket.getOutputStream(), true);
+            
+            while (in.hasNextLine())
+            {
+            	String line = in.nextLine();
+            	
+            	if (line.startsWith("CONNECTED"))
+            	{
+            		JOptionPane.showMessageDialog(null, "Connected with server");
+            		out.println("CONNECETED " + InetAddress.getLocalHost().getHostAddress());
+            	}
+            }
+		}
+		finally
+		{
+			setVisible(false);
+			dispose();
+		}
+	}
 	
 	public ClientGUI_Main(String serverAddress, int serverPort)
 	{
+		this.serverAddress = serverAddress;
+		this.serverPort = serverPort;
+		
 		setTitle("Messenger-Client-Login");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 383, 215);
@@ -89,8 +122,7 @@ public class ClientGUI_Main extends JFrame
 			{
 				id = idField.getText();
 				password = String.valueOf(passwordField.getPassword());
-				idField.setText("");
-				passwordField.setText("");
+				out.println("LOGIN " + id + " " + password);
 			}
 		});
 		
@@ -99,7 +131,7 @@ public class ClientGUI_Main extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				ClientGUI_FindPassword findPW = new ClientGUI_FindPassword();
+				ClientGUI_FindPassword findPW = new ClientGUI_FindPassword(socket, in, out);
 				findPW.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 				findPW.setVisible(true);
 			}
@@ -110,21 +142,10 @@ public class ClientGUI_Main extends JFrame
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				ClientGUI_Register register = new ClientGUI_Register();
+				ClientGUI_Register register = new ClientGUI_Register(socket, in, out);
 				register.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 				register.setVisible(true);
 			}
 		});
-	}
-	
-	/*ClientMain에서 아이디, 비밀번호 얻기위한 getter*/
-	public String getId()
-	{
-		return id;
-	}
-	
-	public String getPassword()
-	{
-		return password;
 	}
 }

@@ -1,15 +1,20 @@
 package client;
 
+import java.awt.EventQueue;
+import java.io.IOException;
+
 public class ClientMain
 {
-
 	public static void main(String[] args)
 	{
-		System.out.println("1");
-		System.out.println("1");
-		System.out.println("1");
-		System.out.println("1");
-		System.out.println("1");
+		/*서버 Ip, Port 읽어오기*/
+		ConfigRead readServerInfo = new ConfigRead();
+		readServerInfo.readFile();
+		String serverAddress = readServerInfo.getIp();
+		int serverPort = readServerInfo.getPort();
+		
+		/*로그인창 GUI 실행*/
+		ClientGUI_Main client = new ClientGUI_Main(serverAddress, serverPort);
+		client.setVisible(true);
 	}
-
 }

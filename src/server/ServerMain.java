@@ -1,16 +1,9 @@
 package server;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -63,12 +56,33 @@ public class ServerMain
 						String[] loginArray = input.split(" ");
 						String loginId = loginArray[1];
 						String loginPassword = loginArray[2];
-						DB.login(DB, loginId, loginPassword);
+						boolean check = DB.login(DB, loginId, loginPassword);
 						
+						if (check)
+						{
+							out.println("LOGINOK");
+						}
+						else
+						{
+							out.println("LOGINFAIL");
+						}
 					}
 					if (input.startsWith("FINDPW"))
 					{
 						System.out.println(input);
+						String[] loginArray = input.split(" ");
+						String findPwId = loginArray[1];
+						String findPwEmail = loginArray[2];
+						String check = DB.findPw(DB, findPwId, findPwEmail);
+						
+						if (check.isEmpty())
+						{
+							out.println("FINDPWFAIL");
+						}
+						else
+						{
+							out.println("FINDPWOK " + check);
+						}
 					}
 					if (input.startsWith("REGISTER"))
 					{

@@ -36,7 +36,7 @@ public class ServerDB
 		}
 	}
 	
-	public void login(ServerDB DB, String id, String password) throws SQLException
+	public boolean login(ServerDB DB, String id, String password) throws SQLException
 	{
 		String search = "select id, password from user where id = '" + id + "';";
 		ResultSet rs = stmt.executeQuery(search);
@@ -44,8 +44,31 @@ public class ServerDB
 		{
 			if (password.equals(rs.getString("password")))
 			{
-				System.out.println("Success");
+				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
+		return false;
+	}
+	
+	public String findPw(ServerDB DB, String id, String email) throws SQLException
+	{
+		String search = "select id, password, email from user where id = '" + id + "';";
+		ResultSet rs = stmt.executeQuery(search);
+		if (rs.next())
+		{
+			if (email.equals(rs.getString("email")))
+			{
+				return rs.getString("password");
+			}
+			else
+			{
+				return "";
+			}
+		}
+		return "";
 	}
 }

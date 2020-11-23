@@ -51,6 +51,26 @@ public class ClientGUI_Main extends JFrame
             		JOptionPane.showMessageDialog(null, "Connected with server");
             		out.println("CONNECETED " + InetAddress.getLocalHost().getHostAddress());
             	}
+            	
+            	if (line.startsWith("LOGINOK"))
+            	{
+            		JOptionPane.showMessageDialog(null, "Login Succeced. Welcome " + id);
+            	}
+            	else if (line.startsWith("LOGINFAIL"))
+            	{
+            		JOptionPane.showMessageDialog(null, "Login Failed. Check Id or Password ");
+            	}
+            	
+            	if (line.startsWith("FINDPWOK"))
+            	{
+            		String[] getPW = line.split(" ");
+            		String myPW = getPW[1];
+            		JOptionPane.showMessageDialog(null, "Find Password Succeced. Password: " + myPW);
+            	}
+            	else if (line.startsWith("FINDPWFAIL"))
+            	{
+            		JOptionPane.showMessageDialog(null, "Find Password Failed. Check Id or Email ");
+            	}
             }
 		}
 		finally

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.concurrent.Executors;
 
 public class ServerMain
 {
+	static ServerDB DB = new ServerDB();
 	public static void main(String[] args) throws Exception
 	{
 		System.out.println("The chat server is running...");
@@ -58,6 +60,11 @@ public class ServerMain
 					if (input.startsWith("LOGIN"))
 					{
 						System.out.println(input);
+						String[] loginArray = input.split(" ");
+						String loginId = loginArray[1];
+						String loginPassword = loginArray[2];
+						DB.login(DB, loginId, loginPassword);
+						
 					}
 					if (input.startsWith("FINDPW"))
 					{

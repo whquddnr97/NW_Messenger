@@ -39,13 +39,13 @@ public class ConfigRead
 		}
 	}
 	
-	// ChatClient 에서 ip를 사용하기 위한 getter
+	// ClientMain 에서 ip를 사용하기 위한 getter
 	String getIp()
 	{
 		return ip; 
 	}
 	
-	// ChatClient 에서 port를 사용하기 위한 getter
+	// ClientMain 에서 port를 사용하기 위한 getter
 	int getPort()
 	{
 		return port; 

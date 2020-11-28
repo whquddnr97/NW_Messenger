@@ -75,6 +75,14 @@ public class ClientGUI_Main extends JFrame
             	{
             		String[] getPW = line.split(" ");
             		String myPW = getPW[1];
+            		try
+            		{
+						myPW = SimpleCrypto.decrypt(myPW);
+					}
+            		catch (Exception e)
+            		{
+						e.printStackTrace();
+					}
             		JOptionPane.showMessageDialog(null, "Find Password Succeced. Password: " + myPW);
             	}
             	else if (line.startsWith("FINDPWFAIL"))
@@ -155,6 +163,12 @@ public class ClientGUI_Main extends JFrame
 			{
 				id = idField.getText();
 				password = String.valueOf(passwordField.getPassword());
+				try {
+					password = SimpleCrypto.encrypt(password);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				out.println("LOGIN " + id + " " + password);
 			}
 		});

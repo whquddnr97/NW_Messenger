@@ -3,5 +3,10 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="C:/Users/BW/Desktop/dev/NW_Messenger/mysql-connector-java-8.0.22.jar"/>
+	<classpathentry kind="lib" path="C:/Users/BW/Desktop/dev/NW_Messenger/commons-codec-1.15.jar"/>
+	<classpathentry kind="lib" path="C:/Users/BW/Desktop/dev/NW_Messenger/commons-codec-1.15-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/BW/Desktop/dev/NW_Messenger/commons-codec-1.15-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/BW/Desktop/dev/NW_Messenger/commons-codec-1.15-tests.jar"/>
+	<classpathentry kind="lib" path="C:/Users/BW/Desktop/dev/NW_Messenger/commons-codec-1.15-test-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

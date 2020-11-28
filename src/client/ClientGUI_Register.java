@@ -3,12 +3,19 @@ package client;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.EncoderException;
+
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
@@ -222,6 +229,14 @@ public class ClientGUI_Register extends JFrame
 				phoneNumber = phoneNumberField.getText();
 				homepage = homepageField.getText();
 				additional = additionalField.getText();
+				try
+				{
+					password = SimpleCrypto.encrypt(password);
+				}
+				catch (Exception e1)
+				{
+					e1.printStackTrace();
+				}
 				
 				if (isBlank(id, password, nickName, name, email, birth))
 				{

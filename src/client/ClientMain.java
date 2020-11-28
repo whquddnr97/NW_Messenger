@@ -7,7 +7,7 @@ public class ClientMain
 	/*메인 메소드*/
 	public static void main(String[] args) throws Exception
 	{
-		/*서버 Ip, Port 읽어오기*/
+		/* ConfigRead.java로 부터 서버 Ip, Port 읽어오기*/
 		ConfigRead readServerInfo = new ConfigRead();
 		readServerInfo.readFile();
 		String serverAddress = readServerInfo.getIp();

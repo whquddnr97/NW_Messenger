@@ -46,12 +46,18 @@ public class ClientGUI_Main extends JFrame
             {
             	String line = in.nextLine();
             	
+            	/*CONNECTED로 시작하는 문자열을 받으면
+            	 * 서버와 연결되었다는 다이얼로그를 띄운 뒤
+            	 * CONNECTED와 클라이언트의 IP주소를 합쳐서 문자열로 보냄*/
             	if (line.startsWith("CONNECTED"))
             	{
             		JOptionPane.showMessageDialog(null, "Connected with server");
             		out.println("CONNECETED " + InetAddress.getLocalHost().getHostAddress());
             	}
             	
+            	/*LOGINOK로 시작하는 문자열을 받으면
+            	 * 로그인 성공 + 클라이언트의 ID를 다이얼로그로 띄움
+            	 * 실패하였을 시는 아이디 또는 비밀번호를 다시 확인하라는 다이얼로그를 띄움*/
             	if (line.startsWith("LOGINOK"))
             	{
             		JOptionPane.showMessageDialog(null, "Login Succeced. Welcome " + id);
@@ -61,6 +67,10 @@ public class ClientGUI_Main extends JFrame
             		JOptionPane.showMessageDialog(null, "Login Failed. Check Id or Password ");
             	}
             	
+            	/*FINDPWOK로 시작하는 문자열을 받으면
+            	 * 서버에서 받아온 문자열을 파싱하여 
+            	 * 비밀번호 찾기 성공이라는 문자열과 비밀번호를 다이얼로그로 띄움
+            	 * 실패시는 아이디나 이메일을 확인하라는 다이얼로그를 띄움*/
             	if (line.startsWith("FINDPWOK"))
             	{
             		String[] getPW = line.split(" ");
@@ -80,6 +90,7 @@ public class ClientGUI_Main extends JFrame
 		}
 	}
 	
+	/*GUI*/
 	public ClientGUI_Main(String serverAddress, int serverPort)
 	{
 		this.serverAddress = serverAddress;
@@ -135,7 +146,9 @@ public class ClientGUI_Main extends JFrame
 		registerButton.setBounds(258, 143, 97, 23);
 		contentPane.add(registerButton);
 		
-		/*로그인 버튼 이벤트*/
+		/*로그인 버튼 이벤트
+		 * idField와 passwordField에 입력된 값을 읽어와서
+		 * LOGIN이라는 문자열과 함께 서버로 보냄*/
 		loginButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -146,7 +159,8 @@ public class ClientGUI_Main extends JFrame
 			}
 		});
 		
-		/*비밀번호 찾기 버튼 이벤트*/
+		/*비밀번호 찾기 버튼 이벤트
+		 * 비밀번호 찾기 GUI를 띄움 - ClientGUI_FindPassword.java*/
 		findPasswordButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -157,7 +171,8 @@ public class ClientGUI_Main extends JFrame
 			}
 		});
 		
-		/*회원가입 버튼 이벤트*/
+		/*회원가입 버튼 이벤트
+		 * 회원가입 GUI를 띄움 - ClientGUI_Register.java*/
 		registerButton.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)

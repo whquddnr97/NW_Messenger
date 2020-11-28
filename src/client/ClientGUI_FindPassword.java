@@ -35,6 +35,7 @@ public class ClientGUI_FindPassword extends JFrame
 		this.in = in;
 		this.out = out;
 		
+		/*GUI*/
 		setTitle("Find Password");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 328, 169);
@@ -77,7 +78,9 @@ public class ClientGUI_FindPassword extends JFrame
 		btnFindPassword.setBounds(91, 97, 137, 23);
 		contentPane.add(btnFindPassword);
 		
-		/*비밀번호 찾기 버튼 이벤트*/
+		/*비밀번호 찾기 버튼 이벤트
+		 * idField와 emailField의 값을 읽어온 뒤
+		 * FINDPW라는 문자열과 id, email 값을 합쳐서 서버로 보냄*/
 		btnFindPassword.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)

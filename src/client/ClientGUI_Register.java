@@ -57,6 +57,7 @@ public class ClientGUI_Register extends JFrame
 		this.in = in;
 		this.out = out;
 		
+		/*GUI*/
 		setTitle("Register");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 389);
@@ -204,6 +205,10 @@ public class ClientGUI_Register extends JFrame
 		btnRegister.setBounds(147, 317, 138, 23);
 		contentPane.add(btnRegister);
 		
+		/*회원가입 버튼 이벤트
+		 * 각각 Field로 부터 입력된 값을 받아온 뒤
+		 * REGISTER 라는 문자열과 함께 입력값을 보냄
+		 * 필수 입력 항목이 빈칸일 경우, 다이얼로그를 띄움*/
 		btnRegister.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)
@@ -226,7 +231,7 @@ public class ClientGUI_Register extends JFrame
 				{
 					out.println("REGISTER " + id + " " + password + " " + nickName + " " +
 								name + " " + email + " " + birth + " " + phoneNumber + " " +
-								homepage + " " + additional + " ");
+								homepage + " " + additional);
 				}
 			}
 		});

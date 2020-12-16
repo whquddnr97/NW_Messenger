@@ -57,21 +57,6 @@ public class ServerDB
 		return false;
 	}
 	
-	public String findName(ServerDB DB, String id) throws SQLException
-	{
-		String name = null;
-		String search = "select id, name from user where id = '" + id + "';";
-		ResultSet rs = stmt.executeQuery(search);
-		if (rs.next())
-		{
-			if (name.equals(rs.getString("name")))
-			{
-				return name;
-			}
-		}
-		return name;
-	}
-	
 	/*클라이언트에서 비밀번호 찾기 요청이 들어온 뒤, select문을 이용하여 id를 찾음
 	 * 해당 id와 이메일이 일치할 시, 비밀번호를 반환*/
 	public String findPw(ServerDB DB, String id, String email) throws SQLException
@@ -105,8 +90,8 @@ public class ServerDB
 		String phoneNumber = registerArray[7];
 		String homepage = registerArray[8];
 		String additional = registerArray[9];
-		String sql = "insert into user(id, password, nickName, name, email, birth, phoneNumber, homepage, additional) "
-				+ "values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		String sql = "insert into user(id, password, nickName, name, email, birth, phoneNumber, homepage, additional, friend) "
+				+ "values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		
 		PreparedStatement pstmt = DB.con.prepareStatement(sql);
 		
@@ -119,6 +104,57 @@ public class ServerDB
 		pstmt.setString(7, phoneNumber);
 		pstmt.setString(8, homepage);
 		pstmt.setString(9, additional);
+		pstmt.setString(10, id);
+		int res = pstmt.executeUpdate();
+	}
+	
+	/*유저의 id로 친구가 되어있는 모든 유저들을 불러옴*/
+	public String findFriend(ServerDB DB, String id) throws SQLException
+	{
+		String search = "select id, friend from user where id = '" + id + "';";
+		ResultSet rs = stmt.executeQuery(search);
+		if (rs.next())
+		{
+			return rs.getString("friend");
+		}
+		return "";
+	}
+	
+	/*유저의 id가 DB에 있는지 검색함*/
+	public String Search(ServerDB DB, String id) throws SQLException
+	{
+		String search = "select id from user where id = '" + id + "';";
+		ResultSet rs = stmt.executeQuery(search);
+		if (rs.next())
+		{
+			return rs.getString("id");
+		}
+		return "";
+	}
+	
+	/*친구 추가 요청을 하였을 때, 원래 있던 친구 리스트에 새로운 친구를 더하여 DB에 업데이트함*/
+	public void AddFriend(ServerDB DB, String id, String addId) throws SQLException
+	{
+		
+		String sql = "update user set friend = ? where id = ?";
+		String friendList = findFriend(DB, id);
+		friendList += " " + addId + " ";
+		PreparedStatement pstmt = DB.con.prepareStatement(sql);
+		
+		pstmt.setString(1, friendList);
+		pstmt.setString(2, id);
+		
+		int res = pstmt.executeUpdate();
+	}
+	
+	/*닉네임 변경 요청이 왔을 때, 해당하는 id의 닉네임을 업데이트함*/
+	public void changeNick(ServerDB DB, String id, String nick) throws SQLException
+	{
+		String sql = "update user set nickName = ? where id = ?";
+		PreparedStatement pstmt = DB.con.prepareStatement(sql);
+		
+		pstmt.setString(1, nick);
+		pstmt.setString(2, id);
 		
 		int res = pstmt.executeUpdate();
 	}

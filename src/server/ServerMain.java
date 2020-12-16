@@ -3,22 +3,20 @@ package server;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ServerMain
 {
-	private static HashMap<String, PrintWriter> participants = new HashMap<>();
-	private static HashMap<String, PrintWriter> hello = new HashMap<>(); 
-	
 	static ServerDB DB = new ServerDB();
 	public static void main(String[] args) throws Exception
 	{
-		/*ì„œë²„ê°€ ê°€ë™ë˜ë©´, ì„œë²„ê°€ ê°€ë™ë˜ì—ˆë‹¤ëŠ” ë©”ì‹œì§€ë¥¼ ì„œë²„ì— ì¶œë ¥ í•œ ë’¤
-		 * ì“°ë ˆë“œí’€ì„ ì´ìš©í•˜ì—¬ ì†Œì¼“ ì—°ê²°ì„ ëŒ€ê¸°í•¨
-		 * accept ë˜ì—ˆì„ ì‹œ, ì“°ë ˆë“œí’€ì„ ì´ìš©í•˜ì—¬ Handlerë¥¼ ì‹¤í–‰*/
+		/*¼­¹ö°¡ °¡µ¿µÇ¸é, ¼­¹ö°¡ °¡µ¿µÇ¾ú´Ù´Â ¸Ş½ÃÁö¸¦ ¼­¹ö¿¡ Ãâ·Â ÇÑ µÚ
+		 * ¾²·¹µåÇ®À» ÀÌ¿ëÇÏ¿© ¼ÒÄÏ ¿¬°áÀ» ´ë±âÇÔ
+		 * accept µÇ¾úÀ» ½Ã, ¾²·¹µåÇ®À» ÀÌ¿ëÇÏ¿© Handler¸¦ ½ÇÇà*/
 		System.out.println("The chat server is running...");
 		ExecutorService pool = Executors.newFixedThreadPool(500);
 		try (ServerSocket listener = new ServerSocket(59001))
@@ -30,22 +28,8 @@ public class ServerMain
 		}
 	}
 
-	//í•´ì‰¬ë§µì—ì„œ valueë¡œ keyë¥¼ ì°¾ê¸° ìœ„í•œ ë©”ì†Œë“œ
-	public static Object getKey(HashMap<String, PrintWriter>in, Object value)
-	{
-		for (Object o : in.keySet())
-		{
-			if (in.get(o).equals(value))
-			{
-				return o;
-			}
-		}
-		return null;
-	}
-	
 	private static class Handler implements Runnable
 	{
-		private String name;
 		private Socket socket;
 		private Scanner in;
 		private PrintWriter out;
@@ -62,25 +46,25 @@ public class ServerMain
 				in = new Scanner(socket.getInputStream());
 				out = new PrintWriter(socket.getOutputStream(), true);
 				
-				/*í´ë¼ì´ì–¸íŠ¸ì™€ ì—°ê²°ë˜ë©´, í´ë¼ì´ì–¸íŠ¸ë¡œ CONNECTEDë¼ëŠ” ë¬¸ìì—´ì„ ë³´ëƒ„*/
+				/*Å¬¶óÀÌ¾ğÆ®¿Í ¿¬°áµÇ¸é, Å¬¶óÀÌ¾ğÆ®·Î CONNECTED¶ó´Â ¹®ÀÚ¿­À» º¸³¿*/
 				out.println("CONNECTED");
 				
 				while (true)
 				{
 					String input = in.nextLine();
 					
-					/*í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° CONNECTEDë¼ëŠ” ë¬¸ìì—´ì„ ë°›ìœ¼ë©´,
-					 * ì„œë²„ì— CONNECTEDë¼ëŠ” ë¬¸ìì—´ê³¼ í´ë¼ì´ì–¸íŠ¸ì˜ ì•„ì´í”¼ì£¼ì†Œë¥¼ ì¶œë ¥*/
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ CONNECTED¶ó´Â ¹®ÀÚ¿­À» ¹ŞÀ¸¸é,
+					 * ¼­¹ö¿¡ CONNECTED¶ó´Â ¹®ÀÚ¿­°ú Å¬¶óÀÌ¾ğÆ®ÀÇ ¾ÆÀÌÇÇÁÖ¼Ò¸¦ Ãâ·Â*/
 					if (input.startsWith("CONNECETED"))
 					{
 						System.out.println(input);
 					}
 					
-					/*í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ë¡œê·¸ì¸ ìš”ì²­ì„ ë°›ìœ¼ë©´,
-					 * ë°›ì€ ë¬¸ìì—´ì„ íŒŒì‹±í•˜ì—¬ ì•„ì´ë””ì™€ ë¹„ë°€ë²ˆí˜¸ë¥¼ ì €ì¥í•œ ë’¤
-					 * DBë¡œ ì•„ì´ë””ì™€ íŒ¨ìŠ¤ì›Œë“œë¥¼ ë³´ëƒ„
-					 * ë¡œê·¸ì¸ ì„±ê³µì‹œ LOGINOKë¥¼, ì‹¤íŒ¨ì‹œ LOGINFAILì´ë¼ëŠ” ë¬¸ìì—´ì„
-					 * í´ë¼ì´ì–¸íŠ¸ë¡œ ì „ì†¡*/
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ·Î±×ÀÎ ¿äÃ»À» ¹ŞÀ¸¸é,
+					 * ¹ŞÀº ¹®ÀÚ¿­À» ÆÄ½ÌÇÏ¿© ¾ÆÀÌµğ¿Í ºñ¹Ğ¹øÈ£¸¦ ÀúÀåÇÑ µÚ
+					 * DB·Î ¾ÆÀÌµğ¿Í ÆĞ½º¿öµå¸¦ º¸³¿
+					 * ·Î±×ÀÎ ¼º°ø½Ã LOGINOK¸¦, ½ÇÆĞ½Ã LOGINFAILÀÌ¶ó´Â ¹®ÀÚ¿­À»
+					 * Å¬¶óÀÌ¾ğÆ®·Î Àü¼Û*/
 					if (input.startsWith("LOGIN"))
 					{
 						System.out.println(input);
@@ -89,20 +73,29 @@ public class ServerMain
 						String loginPassword = loginArray[2];
 						boolean check = DB.login(DB, loginId, loginPassword);
 						
+						/*·Î±×ÀÎÀÌ È®ÀÎ µÇ¸é ·Î±×ÀÎ ³¯Â¥¸¦ ÀúÀå
+						 * Ä£±¸ ¸®½ºÆ®¸¦ DB·Î ºÎÅÍ ºÒ·¯¿Â µÚ, LOGINOK¶ó´Â ¹®ÀÚ¿­°ú ÇÔ²²
+						 * Ä£±¸ ¸®½ºÆ®¸¦ º¸³»ÁÜ*/
 						if (check)
 						{
-							String name = DB.findName(DB, loginId);
-							out.println("LOGINOK " + name);
-							
-							//í•´ì‰¬ë§µì„ ë™ê¸°í™”í•˜ê³ , ì´ë¦„ê³¼ ì¶œë ¥ ìŠ¤íŠ¸ë¦¼ ì €ì¥
-							synchronized (participants)
+							SimpleDateFormat format1 = new SimpleDateFormat ( "yyyy-MM-dd HH:mm:ss");
+							Date time = new Date();
+							String loginTime = format1.format(time);
+							User.add_participants(loginId, out);
+							User.add_socket(loginId, socket);
+							User.add_loginTime(loginId, loginTime);
+							String friendList = DB.findFriend(DB, loginId);
+							String[] friend = friendList.split(" ");
+							String friendSend = "";
+							for (int i = 0; i < friend.length; i++)
 							{
-								if (name.length() > 0 && !participants.containsKey(name))
-								{
-									participants.put(name, out);
-									break;
-								}
+								String findFriend = friend[i];
+								PrintWriter isOnline = null;
+								friendSend += friend[i] + " ";
 							}
+								out.println("LOGINOK " + friendSend);
+							
+							
 						}
 						else
 						{
@@ -110,13 +103,14 @@ public class ServerMain
 						}
 					}
 					
-					/*í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ë¹„ë°€ë²ˆí˜¸ ì°¾ê¸° ìš”ì²­ì´ ë“¤ì–´ì™”ì„ ì‹œ
-					 * ë°›ì€ ë¬¸ìì—´ì„ íŒŒì‹±í•˜ì—¬ ì•„ì´ë””ì™€ ì´ë©”ì¼ì„ ì €ì¥í•œ ë’¤
-					 * DBë¡œ ì•„ì´ë””ì™€ ì´ë©”ì¼ì„ ë³´ëƒ„
-					 * ì‹¤íŒ¨ì‹œ FINDPWFAILì„, ì„±ê³µì‹œ FINDPWOKì™€ ë¹„ë°€ë²ˆí˜¸ë¥¼
-					 * í´ë¼ì´ì–¸íŠ¸ë¡œ ë³´ëƒ„*/
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ºñ¹Ğ¹øÈ£ Ã£±â ¿äÃ»ÀÌ µé¾î¿ÔÀ» ½Ã
+					 * ¹ŞÀº ¹®ÀÚ¿­À» ÆÄ½ÌÇÏ¿© ¾ÆÀÌµğ¿Í ÀÌ¸ŞÀÏÀ» ÀúÀåÇÑ µÚ
+					 * DB·Î ¾ÆÀÌµğ¿Í ÀÌ¸ŞÀÏÀ» º¸³¿
+					 * ½ÇÆĞ½Ã FINDPWFAILÀ», ¼º°ø½Ã FINDPWOK¿Í ºñ¹Ğ¹øÈ£¸¦
+					 * Å¬¶óÀÌ¾ğÆ®·Î º¸³¿*/
 					if (input.startsWith("FINDPW"))
 					{
+						System.out.println(input);
 						String[] loginArray = input.split(" ");
 						String findPwId = loginArray[1];
 						String findPwEmail = loginArray[2];
@@ -132,19 +126,134 @@ public class ServerMain
 						}
 					}
 					
-					/*í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° íšŒì›ê°€ì… ìš”ì²­ì´ ë“¤ì–´ì™”ì„ ì‹œ
-					 * ë°›ì€ ë¬¸ìì—´ì„ DBë¡œ ë³´ëƒ„*/
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ È¸¿ø°¡ÀÔ ¿äÃ»ÀÌ µé¾î¿ÔÀ» ½Ã
+					 * ¹ŞÀº ¹®ÀÚ¿­À» DB·Î º¸³¿*/
 					if (input.startsWith("REGISTER"))
 					{
 						DB.register(DB, input);
 						System.out.println(input);
 					}
 					
-					if (input.startsWith("ONLINE"))
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ Ä£±¸ °Ë»ö ¿äÃ»ÀÌ ¿ÔÀ» ½Ã
+					 * DB¿¡¼­ °Ë»ö ÇÑ µÚ, °á°ú¸¦ º¸³»ÁÜ*/
+					if (input.startsWith("SEARCH"))
 					{
-						int count = participants.size();
-						String countS = String.valueOf(count);
-						out.println("ONLINE " + String.valueOf(participants.size()));
+						String[] inp = input.split(" ");
+						String inpName = inp[1];
+						String result = DB.Search(DB, inpName);
+						out.println("SEARCHRESULT " + result);
+					}
+					
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ Ä£±¸ Ãß°¡ ¿äÃ»ÀÌ ¿ÔÀ» ½Ã
+					 * DB¸¦ ÀÌ¿ëÇÏ¿© Ä£±¸¸¦ Ãß°¡ÇÔ*/
+					if (input.startsWith("ADDFRIEND"))
+					{
+						String[] inp = input.split(" ");
+						String inpName = inp[1];
+						String addName = inp[2];
+						DB.AddFriend(DB, inpName, addName);
+					}
+					
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ »óÅÂ ¸Ş½ÃÁö ¶Ç´Â ´Ğ³×ÀÓ º¯°æ ¿äÃ»ÀÌ ¿ÔÀ» ½Ã
+					 * DB¸¦ ÀÌ¿ëÇÏ¿© ´Ğ³×ÀÓÀ» ¹Ù²ãÁÖ°í, »óÅÂ ¸Ş½ÃÁö º¯°æÀ» ¼­¹ö¿¡ ¹İ¿µÇÔ*/
+					if (input.startsWith("CHANGEINFO"))
+					{
+						String[] inp = input.split(" ");
+						String id = inp[1];
+						String status = inp[2];
+						String nickName = inp[3];
+						
+						User.add_statusMessage(id, status);
+						DB.changeNick(DB, id, nickName);
+					}
+					
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ À¯Àú Á¤º¸¸¦ º¸¿©´Ş¶ó´Â ¿äÃ»ÀÌ ¿ÔÀ» ½Ã,
+					 * ¼­¹ö¿¡¼­ »óÅÂ ¸Ş½ÃÁö¿Í ·Î±×ÀÎ ½Ã°£À» ºÒ·¯¿È*/
+					if (input.startsWith("SHOWINFO"))
+					{
+						String[] inp = input.split(" ");
+						String id = inp[1];
+						
+						String status = User.status_message.get(id);
+						String loginTime = User.login_time.get(id);
+						boolean isOnline = User.participants.containsKey(id);
+						if (isOnline)
+						{
+							out.println("INFOS " + status + " " + loginTime + " " + "online");
+						}
+						else
+						{
+							out.println("INFOS " + status + " " + loginTime + " " + " " + "offline");
+						}
+					}
+					
+					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ÀüÃ¼ Ã¤ÆÃ¹æ Âü¿© ¿äÃ»ÀÌ ¿ÔÀ» ½Ã,
+					 * ENTERALLÀÌ¶ó´Â ¹®ÀÚ¿­À» Å¬¶óÀÌ¾ğÆ®·Î º¸³¿*/
+					if (input.startsWith("ENTERALL"))
+					{
+						out.println("ENTERALL");
+					}
+					
+					/*Å¬¶óÀÌ¾ğÆ®°¡ ÀüÃ¼ Ã¤ÆÃ¹æ¿¡ ¸Ş½ÃÁö¸¦ º¸³ÂÀ» ¶§
+					 * MESSAGEFROM ¹®ÀÚ¿­°ú ÇÔ²² º¸³½ »ç¶÷°ú ¸Ş½ÃÁö¸¦ °¢ Å¬¶óÀÌ¾ğÆ®·Î Àü¼Û*/
+					if (input.startsWith("MESSAGE"))
+					{
+						String[] inp = input.split(" ");
+						String id = inp[1];
+						String message = inp[2];
+						for (PrintWriter p : User.participants.values())
+						{
+							p.println("MESSAGEFROM " + id + " " + message);
+						}
+					}
+					
+					/*Å¬¶óÀÌ¾ğÆ®°¡ 1´ë1 Ã¤ÆÃ¹æ °³¼³ ¿äÃ»À» ÇÏ¿´À» ½Ã
+					 * ½ÅÃ»ÀÚ¿¡°Ô´Â FOPENF¶ó´Â ¹®ÀÚ¿­°ú ¾ÆÀÌµğ¸¦,
+					 * ÇÇ½ÅÃ»ÀÚ¿¡°Ô´Â OPENÀÌ¶ó´Â ¹®ÀÚ¿­°ú ¾ÆÀÌµğ¸¦ º¸³»ÁÜ*/
+					if (input.startsWith("CHATWITH"))
+					{
+						String[] inp = input.split(" ");
+						String id1 = inp[1];
+						String id2 = inp[2];
+						PrintWriter id1p = User.participants.get(id1);
+						PrintWriter id2p = User.participants.get(id2);
+						id1p.println("FOPENF " + id2 + " " + id1);
+						id2p.println("OPEN " + id1 + " " + id2);
+					}
+					
+					/*1´ë1 Ã¤ÆÃ¹æ¿¡ ´ëÇØ ÇÇ½ÅÃ»ÀÚÀÇ ÀÀ´äÀÌ ¿ÔÀ» ½Ã
+					 * °³¼³À» °ÅºÎÇÏ¸é CHAT2NO¿Í rejected¶ó´Â ¹®ÀÚ¿­À»,
+					 * °³¼³À» Çã¿ëÇÏ¸é CHAT2OK¿Í entered¶ó´Â ¹®ÀÚ¿­À» º¸³»ÁÜ*/
+					if (input.startsWith("CHATNO") || input.startsWith("CHATOK"))
+					{
+						String[] ids = input.split(" ");
+						String id1 = ids[1];
+						String id2 = ids[2];
+						PrintWriter id1p = User.participants.get(id1);
+						PrintWriter id2p = User.participants.get(id2);
+						
+						if (input.startsWith("CHATOK"))
+						{
+							id1p.println("CHAT2OK " + id1 + " " + id2 + " " + "entered");
+						}
+						if (input.startsWith("CHATNO"))
+						{
+							id1p.println("CHAT2NO " + id1 + " " + id2 + " " + "rejected");
+						}
+					}
+					
+					/*1´ë1 Ã¤ÆÃ¹æ¿¡¼­ ¸Ş½ÃÁö Àü¼Û ¿äÃ»ÀÌ ¿ÔÀ» ½Ã
+					 * ÇØ´çÇÏ´Â »ç¿ëÀÚ¿¡°Ô CHAT2WITHÀÌ¶ó´Â ¹®ÀÚ¿­°ú ÇÔ²²
+					 * ¸Ş½ÃÁö¸¦ º¸³»ÁÜ*/
+					if (input.startsWith("CHAT2"))
+					{
+						String[] inp = input.split(" ");
+						String from = inp[1];
+						String to = inp[2];
+						String message = inp[3];
+						PrintWriter fromp = User.participants.get(inp[1]);
+						PrintWriter top = User.participants.get(inp[2]);
+						top.println("CHAT2WITH " + from + " " + message);
 					}
 				}
 			}

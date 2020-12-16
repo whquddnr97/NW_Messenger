@@ -6,8 +6,9 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-/*https://pokey.tistory.com/13*
- * Key를 고정하여 사용*/
+/*https://whitecold89.tistory.com/3
+ * AES 대칭키를 이용한 암복호화
+ * 서버-클라이언트가 같은 하나의 키 공유*/
 public class SimpleCrypto
 {
     private final static String HEX = "0123456789ABCDEF";

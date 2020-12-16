@@ -13,6 +13,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+/*비밀번호를 찾기위한 gui class*/
 public class ClientGUI_FindPassword extends JFrame
 {
 

@@ -1,135 +1,189 @@
 package client;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
+import java.io.BufferedReader;
+import java.io.IOException;
+
 import com.google.gson.*;
 
+public class Weather
+{
+	public static String getWeather() throws IOException
+	{
+		/*예보 발표 날짜는 실행 전 날짜*/
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+		/*23시 이후에 실행하면 전날 23시의 예보 데이터를 받아올 수 없음 ( API가 1일치만 제공 ) 따라서 당일 날짜를 이용*/
+		if (calendar.get(Calendar.HOUR_OF_DAY) == 23)
+		{
+			calendar.add(calendar.DATE, 0);
+		}
+		else
+		{
+			calendar.add(calendar.DATE, -1);
+		}
+		
+		String result = "";
+		String serviceKey = "49f1u%2BNPwv1IknmkOA2tI%2FXbNJnkdlkVxoKNnBDGc6BfPSzwqW4e5Gl7BvK3edmhg9Q7SSH8o4vRIJAUv3WbgA%3D%3D"; // 인증키
+		String dataType = "JSON"; // 요청자료형식
+		String baseDate = dateFormat.format(calendar.getTime()); // 발표날짜 : 전날
+		String baseTime = "2300"; // 발표시간 23시
+		String nX = "63"; // 태평3동 격자X
+		String nY = "124"; // 태평3동 격자Y
+		
+		/*프로그램 실행 전날 23시 기준 예보 데이터로, 프로그램 실행 당일 06시까지의 예보 결과를 얻기위한 요청변수들을 url로 encode함*/
+		StringBuilder urlBuilder = new StringBuilder("http://apis.data.go.kr/1360000/VilageFcstInfoService/getVilageFcst");
+        urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + "=" + serviceKey);
+        urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("21", "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("dataType","UTF-8") + "=" + URLEncoder.encode(dataType, "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode(baseDate, "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode(baseTime, "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode(nX, "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode(nY, "UTF-8"));
+        
+        URL url = new URL(urlBuilder.toString());
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        BufferedReader rd;
+        
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Content-type", "application/json");
 
-public class Weather {
-	
-	public static StringBuilder temp = new StringBuilder();
-	
-	public static void main(String[] args) throws IOException {
-		getInfo();	
+        if(conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300)
+        {
+            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        }
+        else
+        {
+            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        while ((result = rd.readLine()) != null)
+        {
+            sb.append(result);
+        }
+        
+        rd.close();
+        conn.disconnect();
+
+        String we = doParse(sb.toString());
+        /*태평3동의 강수확률과 아침 최저기온을 리턴*/
+        return we;
 	}
 	
-	public static String getInfo() throws IOException {
-		SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd");
-		SimpleDateFormat hour = new SimpleDateFormat("HH00");
-		Date time = new Date();
-		String nx = "36"; //위도
-		String ny = "128"; //경도
-//		String baseDate = date.format(time); //조회하고싶은 날짜
-//		String baseTime = hour.format(time); //조회하고싶은 시간
-		String baseDate = "20201215";
-		String baseTime = "0500";
-		String type = "JSON"; //타입 xml, json 등등 ..
-		String serviceKey = "Pe7chXCUPk%2FBnVerISrk2EuEfXgkQH2%2BsaLQCirYWac8AS8rMSH9pccLM%2Bd%2BeaHPr%2F6OTWa07pSZQhWFZDerag%3D%3D"; // 서비스키
-		String URL = "http://apis.data.go.kr/1360000/VilageFcstInfoService/getVilageFcst"; // URL
-
-		StringBuilder urlBuilder = new StringBuilder(URL); /*URL*/
-		urlBuilder.append("?" + URLEncoder.encode("ServiceKey","UTF-8") + "="+serviceKey); /*Service Key*/
-		urlBuilder.append("&" + URLEncoder.encode("pageNo","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*페이지번호*/
-		urlBuilder.append("&" + URLEncoder.encode("numOfRows","UTF-8") + "=" + URLEncoder.encode("10", "UTF-8")); /*한 페이지 결과 수*/
-		urlBuilder.append("&" + URLEncoder.encode("dataType","UTF-8") + "=" + URLEncoder.encode(type, "UTF-8")); /*요청자료형식(XML/JSON)Default: XML*/
-		urlBuilder.append("&" + URLEncoder.encode("base_date","UTF-8") + "=" + URLEncoder.encode(baseDate, "UTF-8")); /*20년 11월 24일 발표*/
-		urlBuilder.append("&" + URLEncoder.encode("base_time","UTF-8") + "=" + URLEncoder.encode(baseTime, "UTF-8")); /*05시 발표(정시단위)*/
-		urlBuilder.append("&" + URLEncoder.encode("nx","UTF-8") + "=" + URLEncoder.encode(nx, "UTF-8")); /*예보지점의 X 좌표값*/
-		urlBuilder.append("&" + URLEncoder.encode("ny","UTF-8") + "=" + URLEncoder.encode(ny, "UTF-8")); /*예보지점 Y 좌표*/
-		URL url = new URL(urlBuilder.toString());
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setRequestMethod("GET");
-		conn.setRequestProperty("Content-type", "application/json");
-//		System.out.println("Response code: " + conn.getResponseCode());
-		BufferedReader rd;
-		if(conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
-			rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		} else {
-			rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-		}
-		StringBuilder sb = new StringBuilder();
-		String line;
-		while ((line = rd.readLine()) != null) {
-			sb.append(line);
-		}
-		rd.close();
-		conn.disconnect();
-		String result=sb.toString();
-//		System.out.println(sb.toString());
-
-
-//		StringBuilder temp = new StringBuilder();
+	public static String doParse(String dataString) 
+    {
+		JsonObject item;
 		
-		JsonParser parser = new JsonParser(); 
-		JsonObject obj = (JsonObject) parser.parse(result); 
-		
-		// first_parse로 파싱
-		JsonObject first_parse = (JsonObject) obj.get("response"); 
-		
-		// first_parse에서 second_parse로 가져오기
-		JsonObject second_parse = (JsonObject) first_parse.get("body"); 
-		
-		// second_parse에서 items로 가져오기
-		JsonObject parse_items = (JsonObject) second_parse.get("items");
-		
-		// items 에서 parse_Array로 가져오기
-		JsonArray parse_Array = (JsonArray) parse_items.get("item");
-		
-		// String 형식으로 다시 가져오기
-		String contents;
-		
-		// 모든정보를 weather라는 JSONObject로 가져옴
-		JsonObject weather; 
+		JsonParser jsonParser = new JsonParser(); // json parser 객체 생성
+    	JsonObject jsonObject = (JsonObject) jsonParser.parse(dataString); // 데이터를 json 객체로 변환
+    	JsonObject jsonResult = (JsonObject) jsonObject.get("response"); // response 키를 이용해 파싱
+    	JsonObject jsonBody = (JsonObject) jsonResult.get("body"); // response에서 body 찾기
+    	JsonObject jsonItems = (JsonObject) jsonBody.get("items"); // body에서 items 찾기
+    	JsonArray jsonItem = (JsonArray) jsonItems.get("item"); // items에서 item 아래 값들을 배열로 저장
+    	String result = "";
+    	
+    	for (int i = 0; i < jsonItem.size(); i++)
+    	{
+    		item = (JsonObject) jsonItem.get(i);
+    		
+    		String fcstTime = item.get("fcstTime").toString();
+    		String category = item.get("category").toString();
+    		String fcstValue = item.get("fcstValue").toString();
+    		
+    		/*06시 자료구분코드에 따라서 출력*/
+    		if (fcstTime.equals("\"0600\""))
+    		{
+    			switch(category)
+    			{
+    			case "\"POP\"" :
+    				result += "오늘 태평3동의 기상예보는";
+    				result +=" 강수확률 " + fcstValue.substring(1, fcstValue.length()-1) + "% 이고, ";
+    				break;
+    			//case "\"PTY\"" :
+    				//result += "강수형태 " + findPTY(fcstValue.substring(1, fcstValue.length()-1) + " ");
+    				//break;
+    			//case "\"SKY\"" :
+    				//result += "하늘 " + findSKY(fcstValue.substring(1, fcstValue.length()-1)+ " ");
+    				//break;
+    			case "\"TMN\"" :
+    				result += "아침 최저기온 " + fcstValue.substring(1, fcstValue.length()-1) + "도";
+    				break;
+    			//case "\"WSD\"" :
+    				//result += "풍속 " + fcstValue.substring(1, fcstValue.length()-1) + "m/s";
+    				//break;
+    			default:
+    				break;
+    			}
+    		}	
+    	}
+    	return result;
+    }
 	
-		sb.append(baseDate+"/"+ baseTime);
+	/*코드값으로 받아오는 강수형태를 해석*/
+	public static String findPTY(String ptyCode)
+	{
+		String status = "";
 		
-		temp.append("날짜 : " + baseDate);
-		temp.append(" ");
-		temp.append("시간 : " + baseTime);
-		temp.append("\n");
-		
-		for(int i = 0 ; i < parse_Array.size(); i++) {
-			weather = (JsonObject) parse_Array.get(i);
-			Object fcstValue = weather.get("fcstValue");
-			Object fcstDate = weather.get("fcstDate");
-			Object fcstTime = weather.get("fcstTime");
-			contents = weather.get("category").toString(); 
-			
-
-			// 카테고리별로 파싱한 값을 넣어준다
-			if(contents.equals("POP"))
-				temp.append("강수확률 : " + fcstValue + "%");
-			else if(contents.equals("PTY"))
-				temp.append(", 강수형태 : " + fcstValue);
-			else if(contents.equals("SKY"))
-				temp.append(", 하늘상태 : " + fcstValue);
-			else if(contents.equals("WSD"))
-				temp.append(", 풍속  : " + fcstValue);
-			else if(contents.equals("R06"))
-				temp.append(", 6시간 강수량 : " + fcstValue + "mm");
-			else if(contents.equals("REH"))
-				temp.append(", 습도 : " + fcstValue + "%");
-			else if(contents.equals("S06"))
-				temp.append(", 6시간 적설량 : " + fcstValue + "cm");
-			else if(contents.equals("WAV"))
-				temp.append(", 파고 : " + fcstValue + "M");
-			else if(contents.equals("T3H") || contents.equals("TMN") || contents.equals("TMX")) {
-				temp.append(", 3시간 기온 : " + fcstValue + "℃");
-				temp.append("\n");
-			}
-			else if(contents.equals("UUU") || contents.equals("VVV"))
-				temp.append(", 풍속 : " + fcstValue + "m/s");
-			else if(contents.equals("VEC"))
-				temp.append(", 풍향 : " + fcstValue + "m/s");
-			else
-				temp.append(", " + fcstValue);
+		switch(ptyCode)
+		{
+			case "0" :
+				status = "없음";
+				break;
+			case "1" :
+				status = "비";
+				break;
+			case "2" :
+				status = "진눈개비";
+				break;
+			case "3" :
+				status = "눈";
+				break;
+			case "4" :
+				status = "소나기";
+				break;
+			case "5" :
+				status = "빗방울";
+				break;
+			case "6" :
+				status = "빗방울/눈날림";
+				break;
+			case "7" :
+				status = "눈날림";
+				break;
+			default :
+				status = "알수없음";
+				break;
 		}
-		return temp.toString();
+		return status;
+	}
+	
+	/*코드값으로 받아오는 하늘상태를 해석*/
+	public static String findSKY(String skyCode)
+	{
+		String status = "";
+		
+		switch(skyCode)
+		{
+			case "1" :
+				status = "맑음";
+				break;
+			case "3" :
+				status = "구름많음";
+				break;
+			case "4" :
+				status = "흐림";
+				break;
+			default :
+				status = "알수없음";
+				break;
+		}
+		return status;
 	}
 }

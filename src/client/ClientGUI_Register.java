@@ -13,14 +13,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.EncoderException;
-
 import javax.swing.JTextField;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 
+/*회원가입을 위한 class*/
 public class ClientGUI_Register extends JFrame
 {
 

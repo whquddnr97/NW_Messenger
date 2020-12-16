@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -14,10 +15,13 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.SwingConstants;
 
+/*메인 클라이언트 class*/
 public class ClientGUI_Main extends JFrame
 {
 	private JPanel contentPane;
@@ -31,8 +35,9 @@ public class ClientGUI_Main extends JFrame
 	private Socket socket;
 	private Scanner in;
 	private PrintWriter out;
-	private String id = "";
+	private static String id = "";
 	private String password = "";
+	
 	
 	public void run() throws IOException
 	{
@@ -41,6 +46,52 @@ public class ClientGUI_Main extends JFrame
 			socket = new Socket(serverAddress, serverPort); // 불러온 서버주소, port로 연결 요청
             in = new Scanner(socket.getInputStream());
             out = new PrintWriter(socket.getOutputStream(), true);
+            
+            /*전체 채팅방을 위한 gui*/
+            JFrame frame = new JFrame("Chatter" + id);
+    		JTextField textField = new JTextField(50);
+    		JTextArea messageArea = new JTextArea(16, 50);
+    		JPanel contentPane;
+    		frame.getContentPane().add(textField, BorderLayout.SOUTH);
+    		frame.getContentPane().add(new JScrollPane(messageArea), BorderLayout.CENTER);
+    	    frame.pack();
+    	    
+    	    textField.addActionListener(new ActionListener()
+            {
+                public void actionPerformed(ActionEvent e)
+                {
+                    out.println("MESSAGE " + id + " " + textField.getText() + "\n");
+                    messageArea.append(textField.getText() + "\n");
+                    textField.setText("");
+                }
+            });
+    	    
+    	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setVisible(false);
+            
+            /*1대1 채팅방을 이용하기 위한 gui*/
+            JFrame frame1 = new JFrame("Chatter");
+    		JTextField textField1 = new JTextField(50);
+    		JTextArea messageArea1 = new JTextArea(16, 50);
+    		JPanel contentPane1;
+    		frame1.getContentPane().add(textField1, BorderLayout.SOUTH);
+    		frame1.getContentPane().add(new JScrollPane(messageArea1), BorderLayout.CENTER);
+    	    frame1.pack();
+    	    
+    	    textField1.addActionListener(new ActionListener()
+            {
+                public void actionPerformed(ActionEvent e)
+                {
+                	String with = frame1.getName();
+                	String[] name = with.split(" ");
+                	
+                    out.println("CHAT2 " + id + " " + name[1] + " " + textField1.getText());
+                    messageArea1.append(textField1.getText() + "\n");
+                    textField1.setText("");
+                }
+            });
+    	    frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame1.setVisible(false);
             
             while (in.hasNextLine())
             {
@@ -60,10 +111,12 @@ public class ClientGUI_Main extends JFrame
             	 * 실패하였을 시는 아이디 또는 비밀번호를 다시 확인하라는 다이얼로그를 띄움*/
             	if (line.startsWith("LOGINOK"))
             	{
-            		JOptionPane.showMessageDialog(null, "Login Succeced. Welcome " + id);
-            		ClientGUI_List a = new ClientGUI_List(in, out);
-            		a.setVisible(true);
+            		String[] getFriend = line.split(" ");
+            		ClientGUI_List2 list = new ClientGUI_List2(getFriend, socket, in, out);
+            		list.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            		list.setVisible(true);
             		setVisible(false);
+            		
             	}
             	else if (line.startsWith("LOGINFAIL"))
             	{
@@ -88,9 +141,119 @@ public class ClientGUI_Main extends JFrame
 					}
             		JOptionPane.showMessageDialog(null, "Find Password Succeced. Password: " + myPW);
             	}
+            	/*FINDPWFAIL이라는 문자열을 받으면,
+            	 * 비밀번호 찾기에 실패, 아이디나 이메일을 확인하라는 다이얼로그를 띄움*/
             	else if (line.startsWith("FINDPWFAIL"))
             	{
             		JOptionPane.showMessageDialog(null, "Find Password Failed. Check Id or Email ");
+            	}
+            	
+            	/*SEARCHRESULT라는 문자열을 받으면, 누구를 검색했는지와 결과를 다이얼로그에 띄워줌*/
+            	if (line.startsWith("SEARCHRESULT"))
+            	{
+            		String[] who = line.split(" ");
+            		String who1 = who[1];
+            		JOptionPane.showMessageDialog(null, "Found " + who1);
+            	}
+            	
+            	/*INFOS라는 문자열을 받으면
+            	 * 상태 메시지, 최근 접속시간, 온 오프라인 여부를 다이얼로그에 띄워줌*/
+            	if (line.startsWith("INFOS"))
+            	{
+            		String[] infos = line.split(" ");
+            		String status = infos[1];
+            		String time = infos[2] + " " + infos[3];
+            		String isOnline = infos[4];
+            		JOptionPane.showMessageDialog(null, "한마디 : " + status + "\n" + "최근 접속시간 : " + time + "\n" + "상태 : " + isOnline);
+            	}
+            	
+            	/*ENTERALL이라는 문자열을 받으면
+            	 * 전체 채팅방을 위한 gui를 띄움*/
+            	if (line.startsWith("ENTERALL"))
+            	{
+            		 frame.setVisible(true);
+            	}
+            	
+            	/*MESSAGEFROM이라는 문자열을 받으면,
+            	 * 전체 채팅방에서 누구한테 온 메시지인지를 messageArea에 띄워줌*/
+            	if (line.startsWith("MESSAGEFROM"))
+            	{
+            		String[] messages = line.split(" ");
+            		String id = messages[1];
+            		String message = messages[2];
+            		if (id.equals(this.id))
+            		{
+            			continue;
+            		}
+            		else
+            		{
+            			messageArea.append("From " + id + " :" + message + "\n");
+            		}
+            	}
+            	
+            	/*OPEN이라는 문자열을 받으면
+            	 * 누구와 채팅할 것인지를 묻는 OptionPane을 띄워주고
+            	 * YES일경우 누구와 채팅을 시작했다고 알려주고 서버로 CHATOK라는 문자열과 함께
+            	 * 참여자 아이디를 보냄
+            	 * NO일경우 CHATNO라는 문자열과 함께 참여자 아이디를 보냄*/
+            	if (line.startsWith("OPEN"))
+            	{
+            		String[] messages = line.split(" ");
+            		String id1 = messages[1];
+            		String id2 = messages[2];
+            		int result = JOptionPane.showConfirmDialog(null, id1 + "와 채팅 하시겠습니까?", "Confirm", JOptionPane.YES_NO_OPTION);
+            		
+            		if (result == JOptionPane.YES_OPTION)
+            		{
+            			frame1.setName("With " + id1);
+            			frame1.setVisible(true);
+            			messageArea1.append("Chat with " + id1 + "\n");
+            			out.println("CHATOK " + id1 + " " + id2);
+            		}
+            		else
+            		{
+            			out.println("CHATNO "+ id1 + " " + id2);
+            		}
+            	}
+            	
+            	/*FOPENF라는 문자열을 받으면, 1대1 채팅을 위한 gui를 띄우고
+            	 * 상대를 기다리고 있다는 메시지를 출력함*/
+            	if (line.startsWith("FOPENF"))
+            	{
+            		String[] messages = line.split(" ");
+            		String id1 = messages[1];
+            		frame1.setName("With " + id1);
+            		frame1.setVisible(true);
+            		messageArea1.append("Waiting for " + id1 + "\n");
+            	}
+            	
+            	/*CHAT2NO라는 메시지를 받으면, 상대가 1대1 채팅을 거절했다고 띄워주고
+            	 * CHAT2OK라는 메시지를 받으면, 상대가 들어왔다고 띄워줌*/
+            	if (line.startsWith("CHAT2NO") || line.startsWith("CHAT2OK"))
+            	{
+            		String[] input = line.split(" ");
+            		String id1 = input[1];
+            		String id2 = input[2];
+            		String stat = input[3];
+            		
+            		if (line.startsWith("CHAT2NO"))
+            		{
+            			messageArea1.append(id1 + id2 + " Chat room rejected");
+            		}
+            		if (line.startsWith("CHAT2OK"))
+            		{
+            			messageArea1.append(id2 + " Entered" + "\n");
+            		}
+            	}
+            	
+            	/*CHAT2WITH이라는 메시지를 받으면, 1대1 채팅방에서 누구한테 온 메시지인지,
+            	 * 그리고 메시지의 내용을 띄워줌*/
+            	if (line.startsWith("CHAT2WITH"))
+            	{
+            		String[] input = line.split(" ");
+            		String from = input[1];
+            		String message = input[2];
+            		messageArea1.append("From " + from + " : " + message + "\n");
             	}
             }
 		}
@@ -199,5 +362,9 @@ public class ClientGUI_Main extends JFrame
 				register.setVisible(true);
 			}
 		});
+	}
+	public static String getId()
+	{
+		return id;
 	}
 }

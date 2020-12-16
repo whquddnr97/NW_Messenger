@@ -16,9 +16,9 @@ public class ServerMain
 	static ServerDB DB = new ServerDB();
 	public static void main(String[] args) throws Exception
 	{
-		/*¼­¹ö°¡ °¡µ¿µÇ¸é, ¼­¹ö°¡ °¡µ¿µÇ¾ú´Ù´Â ¸Ş½ÃÁö¸¦ ¼­¹ö¿¡ Ãâ·Â ÇÑ µÚ
-		 * ¾²·¹µåÇ®À» ÀÌ¿ëÇÏ¿© ¼ÒÄÏ ¿¬°áÀ» ´ë±âÇÔ
-		 * accept µÇ¾úÀ» ½Ã, ¾²·¹µåÇ®À» ÀÌ¿ëÇÏ¿© Handler¸¦ ½ÇÇà*/
+		/*ì„œë²„ê°€ ê°€ë™ë˜ë©´, ì„œë²„ê°€ ê°€ë™ë˜ì—ˆë‹¤ëŠ” ë©”ì‹œì§€ë¥¼ ì„œë²„ì— ì¶œë ¥ í•œ ë’¤
+		 * ì“°ë ˆë“œí’€ì„ ì´ìš©í•˜ì—¬ ì†Œì¼“ ì—°ê²°ì„ ëŒ€ê¸°í•¨
+		 * accept ë˜ì—ˆì„ ì‹œ, ì“°ë ˆë“œí’€ì„ ì´ìš©í•˜ì—¬ Handlerë¥¼ ì‹¤í–‰*/
 		System.out.println("The chat server is running...");
 		ExecutorService pool = Executors.newFixedThreadPool(500);
 		try (ServerSocket listener = new ServerSocket(59001))
@@ -30,7 +30,7 @@ public class ServerMain
 		}
 	}
 
-	//ÇØ½¬¸Ê¿¡¼­ value·Î key¸¦ Ã£±â À§ÇÑ ¸Ş¼Òµå
+	//í•´ì‰¬ë§µì—ì„œ valueë¡œ keyë¥¼ ì°¾ê¸° ìœ„í•œ ë©”ì†Œë“œ
 	public static Object getKey(HashMap<String, PrintWriter>in, Object value)
 	{
 		for (Object o : in.keySet())
@@ -62,25 +62,25 @@ public class ServerMain
 				in = new Scanner(socket.getInputStream());
 				out = new PrintWriter(socket.getOutputStream(), true);
 				
-				/*Å¬¶óÀÌ¾ğÆ®¿Í ¿¬°áµÇ¸é, Å¬¶óÀÌ¾ğÆ®·Î CONNECTED¶ó´Â ¹®ÀÚ¿­À» º¸³¿*/
+				/*í´ë¼ì´ì–¸íŠ¸ì™€ ì—°ê²°ë˜ë©´, í´ë¼ì´ì–¸íŠ¸ë¡œ CONNECTEDë¼ëŠ” ë¬¸ìì—´ì„ ë³´ëƒ„*/
 				out.println("CONNECTED");
 				
 				while (true)
 				{
 					String input = in.nextLine();
 					
-					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ CONNECTED¶ó´Â ¹®ÀÚ¿­À» ¹ŞÀ¸¸é,
-					 * ¼­¹ö¿¡ CONNECTED¶ó´Â ¹®ÀÚ¿­°ú Å¬¶óÀÌ¾ğÆ®ÀÇ ¾ÆÀÌÇÇÁÖ¼Ò¸¦ Ãâ·Â*/
+					/*í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° CONNECTEDë¼ëŠ” ë¬¸ìì—´ì„ ë°›ìœ¼ë©´,
+					 * ì„œë²„ì— CONNECTEDë¼ëŠ” ë¬¸ìì—´ê³¼ í´ë¼ì´ì–¸íŠ¸ì˜ ì•„ì´í”¼ì£¼ì†Œë¥¼ ì¶œë ¥*/
 					if (input.startsWith("CONNECETED"))
 					{
 						System.out.println(input);
 					}
 					
-					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ·Î±×ÀÎ ¿äÃ»À» ¹ŞÀ¸¸é,
-					 * ¹ŞÀº ¹®ÀÚ¿­À» ÆÄ½ÌÇÏ¿© ¾ÆÀÌµğ¿Í ºñ¹Ğ¹øÈ£¸¦ ÀúÀåÇÑ µÚ
-					 * DB·Î ¾ÆÀÌµğ¿Í ÆĞ½º¿öµå¸¦ º¸³¿
-					 * ·Î±×ÀÎ ¼º°ø½Ã LOGINOK¸¦, ½ÇÆĞ½Ã LOGINFAILÀÌ¶ó´Â ¹®ÀÚ¿­À»
-					 * Å¬¶óÀÌ¾ğÆ®·Î Àü¼Û*/
+					/*í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ë¡œê·¸ì¸ ìš”ì²­ì„ ë°›ìœ¼ë©´,
+					 * ë°›ì€ ë¬¸ìì—´ì„ íŒŒì‹±í•˜ì—¬ ì•„ì´ë””ì™€ ë¹„ë°€ë²ˆí˜¸ë¥¼ ì €ì¥í•œ ë’¤
+					 * DBë¡œ ì•„ì´ë””ì™€ íŒ¨ìŠ¤ì›Œë“œë¥¼ ë³´ëƒ„
+					 * ë¡œê·¸ì¸ ì„±ê³µì‹œ LOGINOKë¥¼, ì‹¤íŒ¨ì‹œ LOGINFAILì´ë¼ëŠ” ë¬¸ìì—´ì„
+					 * í´ë¼ì´ì–¸íŠ¸ë¡œ ì „ì†¡*/
 					if (input.startsWith("LOGIN"))
 					{
 						System.out.println(input);
@@ -94,7 +94,7 @@ public class ServerMain
 							String name = DB.findName(DB, loginId);
 							out.println("LOGINOK " + name);
 							
-							//ÇØ½¬¸ÊÀ» µ¿±âÈ­ÇÏ°í, ÀÌ¸§°ú Ãâ·Â ½ºÆ®¸² ÀúÀå
+							//í•´ì‰¬ë§µì„ ë™ê¸°í™”í•˜ê³ , ì´ë¦„ê³¼ ì¶œë ¥ ìŠ¤íŠ¸ë¦¼ ì €ì¥
 							synchronized (participants)
 							{
 								if (name.length() > 0 && !participants.containsKey(name))
@@ -110,14 +110,13 @@ public class ServerMain
 						}
 					}
 					
-					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ ºñ¹Ğ¹øÈ£ Ã£±â ¿äÃ»ÀÌ µé¾î¿ÔÀ» ½Ã
-					 * ¹ŞÀº ¹®ÀÚ¿­À» ÆÄ½ÌÇÏ¿© ¾ÆÀÌµğ¿Í ÀÌ¸ŞÀÏÀ» ÀúÀåÇÑ µÚ
-					 * DB·Î ¾ÆÀÌµğ¿Í ÀÌ¸ŞÀÏÀ» º¸³¿
-					 * ½ÇÆĞ½Ã FINDPWFAILÀ», ¼º°ø½Ã FINDPWOK¿Í ºñ¹Ğ¹øÈ£¸¦
-					 * Å¬¶óÀÌ¾ğÆ®·Î º¸³¿*/
+					/*í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° ë¹„ë°€ë²ˆí˜¸ ì°¾ê¸° ìš”ì²­ì´ ë“¤ì–´ì™”ì„ ì‹œ
+					 * ë°›ì€ ë¬¸ìì—´ì„ íŒŒì‹±í•˜ì—¬ ì•„ì´ë””ì™€ ì´ë©”ì¼ì„ ì €ì¥í•œ ë’¤
+					 * DBë¡œ ì•„ì´ë””ì™€ ì´ë©”ì¼ì„ ë³´ëƒ„
+					 * ì‹¤íŒ¨ì‹œ FINDPWFAILì„, ì„±ê³µì‹œ FINDPWOKì™€ ë¹„ë°€ë²ˆí˜¸ë¥¼
+					 * í´ë¼ì´ì–¸íŠ¸ë¡œ ë³´ëƒ„*/
 					if (input.startsWith("FINDPW"))
 					{
-						System.out.println(input);
 						String[] loginArray = input.split(" ");
 						String findPwId = loginArray[1];
 						String findPwEmail = loginArray[2];
@@ -133,8 +132,8 @@ public class ServerMain
 						}
 					}
 					
-					/*Å¬¶óÀÌ¾ğÆ®·ÎºÎÅÍ È¸¿ø°¡ÀÔ ¿äÃ»ÀÌ µé¾î¿ÔÀ» ½Ã
-					 * ¹ŞÀº ¹®ÀÚ¿­À» DB·Î º¸³¿*/
+					/*í´ë¼ì´ì–¸íŠ¸ë¡œë¶€í„° íšŒì›ê°€ì… ìš”ì²­ì´ ë“¤ì–´ì™”ì„ ì‹œ
+					 * ë°›ì€ ë¬¸ìì—´ì„ DBë¡œ ë³´ëƒ„*/
 					if (input.startsWith("REGISTER"))
 					{
 						DB.register(DB, input);

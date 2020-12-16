@@ -3,12 +3,16 @@ package server;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ServerMain
 {
+	private static HashMap<String, PrintWriter> participants = new HashMap<>();
+	private static HashMap<String, PrintWriter> hello = new HashMap<>(); 
+	
 	static ServerDB DB = new ServerDB();
 	public static void main(String[] args) throws Exception
 	{
@@ -26,8 +30,22 @@ public class ServerMain
 		}
 	}
 
+	//해쉬맵에서 value로 key를 찾기 위한 메소드
+	public static Object getKey(HashMap<String, PrintWriter>in, Object value)
+	{
+		for (Object o : in.keySet())
+		{
+			if (in.get(o).equals(value))
+			{
+				return o;
+			}
+		}
+		return null;
+	}
+	
 	private static class Handler implements Runnable
 	{
+		private String name;
 		private Socket socket;
 		private Scanner in;
 		private PrintWriter out;
@@ -73,7 +91,18 @@ public class ServerMain
 						
 						if (check)
 						{
-							out.println("LOGINOK");
+							String name = DB.findName(DB, loginId);
+							out.println("LOGINOK " + name);
+							
+							//해쉬맵을 동기화하고, 이름과 출력 스트림 저장
+							synchronized (participants)
+							{
+								if (name.length() > 0 && !participants.containsKey(name))
+								{
+									participants.put(name, out);
+									break;
+								}
+							}
 						}
 						else
 						{
@@ -110,6 +139,13 @@ public class ServerMain
 					{
 						DB.register(DB, input);
 						System.out.println(input);
+					}
+					
+					if (input.startsWith("ONLINE"))
+					{
+						int count = participants.size();
+						String countS = String.valueOf(count);
+						out.println("ONLINE " + String.valueOf(participants.size()));
 					}
 				}
 			}

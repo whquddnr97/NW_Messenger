@@ -6,6 +6,8 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+/*https://pokey.tistory.com/13*
+ * Key를 고정하여 사용*/
 public class SimpleCrypto
 {
     private final static String HEX = "0123456789ABCDEF";

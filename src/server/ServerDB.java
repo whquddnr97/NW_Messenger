@@ -57,6 +57,21 @@ public class ServerDB
 		return false;
 	}
 	
+	public String findName(ServerDB DB, String id) throws SQLException
+	{
+		String name = null;
+		String search = "select id, name from user where id = '" + id + "';";
+		ResultSet rs = stmt.executeQuery(search);
+		if (rs.next())
+		{
+			if (name.equals(rs.getString("name")))
+			{
+				return name;
+			}
+		}
+		return name;
+	}
+	
 	/*클라이언트에서 비밀번호 찾기 요청이 들어온 뒤, select문을 이용하여 id를 찾음
 	 * 해당 id와 이메일이 일치할 시, 비밀번호를 반환*/
 	public String findPw(ServerDB DB, String id, String email) throws SQLException

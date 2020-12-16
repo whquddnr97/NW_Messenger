@@ -61,6 +61,9 @@ public class ClientGUI_Main extends JFrame
             	if (line.startsWith("LOGINOK"))
             	{
             		JOptionPane.showMessageDialog(null, "Login Succeced. Welcome " + id);
+            		ClientGUI_List a = new ClientGUI_List(in, out);
+            		a.setVisible(true);
+            		setVisible(false);
             	}
             	else if (line.startsWith("LOGINFAIL"))
             	{
